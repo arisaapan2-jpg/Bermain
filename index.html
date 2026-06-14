@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - MyWorld</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .container {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 360px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+  h2 { color: #fff; text-align: center; margin-bottom: 8px; font-size: 26px; }
+  .subtitle { color: rgba(255,255,255,0.5); text-align: center; font-size: 13px; margin-bottom: 28px; }
+  label { color: rgba(255,255,255,0.7); font-size: 13px; display: block; margin-bottom: 6px; }
+  input {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; color: #fff; font-size: 14px;
+    margin-bottom: 18px; outline: none; transition: 0.3s;
+  }
+  input:focus { border-color: #a78bfa; background: rgba(167,139,250,0.1); }
+  .btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    border: none; border-radius: 12px; color: #fff;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: 0.3s; margin-top: 4px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124,58,237,0.5); }
+  .divider { text-align: center; color: rgba(255,255,255,0.3); margin: 20px 0; font-size: 13px; }
+  .register-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 16px; padding: 20px; margin-top: 4px;
+  }
+  .register-box p { color: rgba(255,255,255,0.6); font-size: 12px; text-align: center; margin-bottom: 12px; }
+  .btn-outline {
+    width: 100%; padding: 11px;
+    background: transparent;
+    border: 1px solid #a78bfa; border-radius: 12px; color: #a78bfa;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s;
+  }
+  .btn-outline:hover { background: rgba(167,139,250,0.15); }
+  .error { color: #f87171; font-size: 12px; margin-top: -12px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>✨ MyWorld</h2>
+  <p class="subtitle">Masuk ke duniamu</p>
+  <label>Username</label>
+  <input type="text" id="loginUser" placeholder="Masukkan username">
+  <label>Password</label>
+  <input type="password" id="loginPass" placeholder="Masukkan password">
+  <div id="loginError" class="error"></div>
+  <button class="btn" onclick="doLogin()">Masuk</button>
+  <div class="divider">— Belum punya akun? —</div>
+  <div class="register-box">
+    <p>Daftar sekarang, gratis!</p>
+    <button class="btn-outline" onclick="location.href='register.html'">Buat Akun</button>
+  </div>
+</div>
+<script>
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginError');
+  if (!u || !p) { err.textContent = 'Username dan password wajib diisi!'; return; }
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const found = users.find(x => x.username === u && x.password === p);
+  if (!found) { err.textContent = 'Username atau password salah!'; return; }
+  localStorage.setItem('currentUser', u);
+  location.href = 'home.html';
+}
+</script>
+</body>
+</html>
