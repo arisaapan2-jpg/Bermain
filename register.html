@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar - MyWorld</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .container {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 360px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+  h2 { color: #fff; text-align: center; margin-bottom: 8px; font-size: 26px; }
+  .subtitle { color: rgba(255,255,255,0.5); text-align: center; font-size: 13px; margin-bottom: 28px; }
+  label { color: rgba(255,255,255,0.7); font-size: 13px; display: block; margin-bottom: 6px; }
+  input {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; color: #fff; font-size: 14px;
+    margin-bottom: 18px; outline: none; transition: 0.3s;
+  }
+  input:focus { border-color: #34d399; background: rgba(52,211,153,0.08); }
+  .btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #34d399, #059669);
+    border: none; border-radius: 12px; color: #fff;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(5,150,105,0.5); }
+  .back { text-align: center; margin-top: 16px; }
+  .back a { color: rgba(255,255,255,0.5); font-size: 13px; text-decoration: none; }
+  .back a:hover { color: #fff; }
+  .error { color: #f87171; font-size: 12px; margin-top: -12px; margin-bottom: 12px; }
+  .success { color: #34d399; font-size: 13px; text-align: center; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>🌟 Daftar</h2>
+  <p class="subtitle">Buat akun MyWorld-mu</p>
+  <label>Username</label>
+  <input type="text" id="regUser" placeholder="Buat username">
+  <label>Password</label>
+  <input type="password" id="regPass" placeholder="Buat password">
+  <label>Konfirmasi Password</label>
+  <input type="password" id="regPass2" placeholder="Ulangi password">
+  <div id="regError" class="error"></div>
+  <button class="btn" onclick="doRegister()">Buat Akun</button>
+  <div id="regSuccess" class="success"></div>
+  <div class="back"><a href="index.html">← Sudah punya akun? Masuk</a></div>
+</div>
+<script>
+function doRegister() {
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value.trim();
+  const p2 = document.getElementById('regPass2').value.trim();
+  const err = document.getElementById('regError');
+  const suc = document.getElementById('regSuccess');
+  err.textContent = ''; suc.textContent = '';
+  if (!u || !p || !p2) { err.textContent = 'Semua kolom wajib diisi!'; return; }
+  if (p !== p2) { err.textContent = 'Password tidak cocok!'; return; }
+  if (p.length < 4) { err.textContent = 'Password minimal 4 karakter!'; return; }
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  if (users.find(x => x.username === u)) { err.textContent = 'Username sudah dipakai!'; return; }
+  users.push({ username: u, password: p });
+  localStorage.setItem('users', JSON.stringify(users));
+  suc.textContent = 'Akun berhasil dibuat! Mengalihkan...';
+  setTimeout(() => { location.href = 'index.html'; }, 1500);
+}
+</script>
+</body>
+  </html>
