@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyWorld - Home</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  min-height:100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  font-family:'Segoe UI',sans-serif; overflow-x:hidden;
+}
+.topbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 24px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.topbar h1 { color:#fff; font-size:20px; }
+.topbar span { color:rgba(255,255,255,0.6); font-size:13px; }
+.logout { background:none; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.6);
+  padding:6px 14px; border-radius:8px; cursor:pointer; font-size:12px; transition:0.3s; }
+.logout:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
+/* Hero section dengan karakter animasi */
+.hero {
+  display:flex; flex-direction:column; align-items:center;
+  padding:30px 20px 10px;
+}
+.char-wrap { position:relative; width:160px; height:220px; margin-bottom:10px; }
+.char-body {
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  50% { transform:translateX(-50%) translateY(-14px); }
+}
+/* Karakter SVG cewek animasi */
+.char-body svg { filter: drop-shadow(0 10px 30px rgba(167,139,250,0.5)); }
+
+/* Chat bubble AI */
+.ai-bubble {
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(167,139,250,0.4);
+  border-radius:20px 20px 20px 4px;
+  padding:14px 18px;
+  max-width:300px;
+  color:#fff;
+  font-size:14px;
+  line-height:1.6;
+  margin-bottom:20px;
+  position:relative;
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.ai-name { color:#a78bfa; font-size:11px; font-weight:700; margin-bottom:4px; letter-spacing:1px; }
+.typing-dots span {
+  display:inline-block; width:6px; height:6px; background:#a78bfa;
+  border-radius:50%; margin:0 2px; animation:bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+
+/* Menu grid */
+.menu-title { color:rgba(255,255,255,0.5); font-size:12px; letter-spacing:2px; text-transform:uppercase; text-align:center; margin-bottom:16px; }
+.menu-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+  padding:0 20px 100px; max-width:420px; margin:0 auto;
+}
+.menu-card {
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:18px; padding:20px 16px;
+  cursor:pointer; transition:0.3s; text-align:center;
+}
+.menu-card:hover { transform:translateY(-4px); border-color:rgba(167,139,250,0.5); background:rgba(167,139,250,0.1); }
+.menu-card .icon { font-size:32px; margin-bottom:8px; }
+.menu-card .name { color:#fff; font-size:14px; font-weight:600; }
+.menu-card .desc { color:rgba(255,255,255,0.4); font-size:11px; margin-top:4px; }
+
+/* Musik FAB */
+.music-fab {
+  position:fixed; bottom:24px; right:24px;
+  width:56px; height:56px;
+  background:linear-gradient(135deg,#f472b6,#9333ea);
+  border-radius:50%; border:none; cursor:pointer;
+  font-size:24px; box-shadow:0 8px 25px rgba(147,51,234,0.5);
+  transition:0.3s; z-index:100;
+}
+.music-fab:hover { transform:scale(1.1); }
+.music-fab.playing { animation:spin 3s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Music Panel */
+.music-panel {
+  position:fixed; bottom:90px; right:16px;
+  background:rgba(15,12,41,0.95);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:20px; padding:16px;
+  width:280px; z-index:99;
+  display:none; box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.music-panel.show { display:block; animation:slideUp 0.3s ease; }
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+.music-panel h3 { color:#fff; font-size:14px; margin-bottom:12px; }
+.song-item {
+  display:flex; align-items:center; gap:10px; padding:10px;
+  border-radius:10px; cursor:pointer; transition:0.2s;
+}
+.song-item:hover { background:rgba(255,255,255,0.08); }
+.song-item.active { background:rgba(167,139,250,0.2); }
+.song-num { color:rgba(255,255,255,0.3); font-size:12px; width:18px; }
+.song-info .title { color:#fff; font-size:13px; font-weight:500; }
+.song-info .artist { color:rgba(255,255,255,0.4); font-size:11px; }
+.song-play { margin-left:auto; color:#a78bfa; font-size:16px; }
+.now-playing-bar {
+  background:rgba(167,139,250,0.1); border-radius:10px;
+  padding:10px 12px; margin-bottom:10px;
+  display:none; align-items:center; gap:10px;
+}
+.now-playing-bar.show { display:flex; }
+.np-info { flex:1; }
+.np-title { color:#fff; font-size:12px; font-weight:600; }
+.np-artist { color:rgba(255,255,255,0.4); font-size:11px; }
+.np-btn { background:none; border:none; color:#a78bfa; font-size:20px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>✨ MyWorld</h1>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="greetUser">Halo!</span>
+    <button class="logout" onclick="logout()">Keluar</button>
+  </div>
+</div>
+
+<div class="hero">
+  <!-- Karakter cewek animasi SVG -->
+  <div class="char-wrap">
+    <div class="char-body">
+      <svg width="130" height="200" viewBox="0 0 130 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rambut -->
+        <ellipse cx="65" cy="38" rx="35" ry="38" fill="#4B2D8F"/>
+        <ellipse cx="65" cy="42" rx="28" ry="30" fill="#6D3EC1"/>
+        <!-- Rambut panjang -->
+        <rect x="30" y="45" width="14" height="80" rx="7" fill="#4B2D8F"/>
+        <rect x="86" y="45" width="14" height="80" rx="7" fill="#4B2D8F"/>
+        <!-- Wajah -->
+        <ellipse cx="65" cy="55" rx="27" ry="28" fill="#FDDCB5"/>
+        <!-- Mata -->
+        <ellipse cx="55" cy="52" rx="5" ry="6" fill="#2D1B69"/>
+        <ellipse cx="75" cy="52" rx="5" ry="6" fill="#2D1B69"/>
+        <ellipse cx="56" cy="51" rx="2" ry="2" fill="white"/>
+        <ellipse cx="76" cy="51" rx="2" ry="2" fill="white"/>
+        <!-- Alis -->
+        <path d="M49 44 Q55 41 61 44" stroke="#4B2D8F" stroke-width="2" stroke-linecap="round"/>
+        <path d="M69 44 Q75 41 81 44" stroke="#4B2D8F" stroke-width="2" stroke-linecap="round"/>
+        <!-- Hidung -->
+        <ellipse cx="65" cy="59" rx="2" ry="1.5" fill="#F0C090"/>
+        <!-- Mulut senyum -->
+        <path d="M57 66 Q65 73 73 66" stroke="#E8829A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Pipi merah -->
+        <ellipse cx="48" cy="62" rx="7" ry="4" fill="rgba(255,150,150,0.3)"/>
+        <ellipse cx="82" cy="62" rx="7" ry="4" fill="rgba(255,150,150,0.3)"/>
+        <!-- Leher -->
+        <rect x="57" y="80" width="16" height="18" rx="6" fill="#FDDCB5"/>
+        <!-- Baju/Dress -->
+        <path d="M30 98 Q40 90 57 94 L65 105 L73 94 Q90 90 100 98 L108 160 Q85 170 65 170 Q45 170 22 160 Z" fill="#A78BFA"/>
+        <!-- Aksen baju -->
+        <path d="M57 94 L65 105 L73 94" stroke="#7C3AED" stroke-width="2" fill="none"/>
+        <!-- Lengan kiri -->
+        <path d="M30 100 Q15 115 18 135 Q22 145 28 140 Q35 125 38 108" fill="#FDDCB5"/>
+        <!-- Tangan kiri -->
+        <ellipse cx="21" cy="138" rx="8" ry="6" fill="#FDDCB5"/>
+        <!-- Lengan kanan -->
+        <path d="M100 100 Q115 115 112 135 Q108 145 102 140 Q95 125 92 108" fill="#FDDCB5"/>
+        <!-- Tangan kanan -->
+        <ellipse cx="109" cy="138" rx="8" ry="6" fill="#FDDCB5"/>
+        <!-- Rok bawah -->
+        <path d="M22 160 Q45 175 65 175 Q85 175 108 160 L112 195 Q85 205 65 205 Q45 205 18 195 Z" fill="#7C3AED"/>
+        <!-- Sepatu -->
+        <ellipse cx="48" cy="195" rx="15" ry="7" fill="#2D1B69"/>
+        <ellipse cx="82" cy="195" rx="15" ry="7" fill="#2D1B69"/>
+        <!-- Bintang dekorasi -->
+        <text x="10" y="90" font-size="12" fill="#F472B6" opacity="0.8">✦</text>
+        <text x="108" y="85" font-size="10" fill="#A78BFA" opacity="0.8">✦</text>
+        <text x="5" y="130" font-size="8" fill="#34D399" opacity="0.7">★</text>
+        <text x="115" y="125" font-size="9" fill="#F472B6" opacity="0.7">★</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- AI Bubble -->
+  <div class="ai-bubble" id="aiBubble">
+    <div class="ai-name">✦ LUNA AI</div>
+    <div id="aiText"><span class="typing-dots"><span></span><span></span><span></span></span></div>
+  </div>
+</div>
+
+<p class="menu-title">Menu</p>
+<div class="menu-grid">
+  <div class="menu-card" onclick="location.href='chess.html'">
+    <div class="icon">♟️</div>
+    <div class="name">Catur</div>
+    <div class="desc">Main catur seru!</div>
+  </div>
+  <div class="menu-card" onclick="showAI('Wah, fitur ini masih dalam pengembangan! Tunggu update berikutnya ya~ 🎮')">
+    <div class="icon">🎮</div>
+    <div class="name">Game Lain</div>
+    <div class="desc">Segera hadir</div>
+  </div>
+  <div class="menu-card" onclick="showAI('Profil kamu sedang dalam pengembangan! Nanti bisa custom avatar~ 🌟')">
+    <div class="icon">👤</div>
+    <div class="name">Profil</div>
+    <div class="desc">Lihat akunmu</div>
+  </div>
+  <div class="menu-card" onclick="showAI('Selamat datang di MyWorld! Ada yang bisa aku bantu? 💫')">
+    <div class="icon">💬</div>
+    <div class="name">Tanya Luna</div>
+    <div class="desc">Chat dengan AI</div>
+  </div>
+</div>
+
+<!-- Musik FAB -->
+<button class="music-fab" id="musicFab" onclick="toggleMusic()">🎵</button>
+
+<!-- Music Panel -->
+<div class="music-panel" id="musicPanel">
+  <div class="now-playing-bar" id="nowPlayingBar">
+    <span>🎵</span>
+    <div class="np-info">
+      <div class="np-title" id="npTitle">-</div>
+      <div class="np-artist" id="npArtist">-</div>
+    </div>
+    <button class="np-btn" onclick="stopSong()">⏹</button>
+  </div>
+  <h3>🎵 Musik Populer Indo</h3>
+  <div id="songList"></div>
+</div>
+
+<script>
+const user = localStorage.getItem('currentUser');
+if (!user) location.href = 'index.html';
+document.getElementById('greetUser').textContent = 'Halo, ' + user + '!';
+
+const aiMessages = [
+  'Halo ' + user + '! Aku Luna, asisten AI-mu. Selamat datang di MyWorld! 🌟',
+  'Kamu bisa main catur, dengerin musik, atau ngobrol sama aku kapan aja! 💫',
+  'Pengen main catur? Ada level Easy sampai Hard lho! Cobain yuk~ ♟️',
+  'Jangan lupa dengerin musik favorit sambil main ya! Klik tombol 🎵 di bawah!',
+];
+let aiIdx = 0;
+function typeAI(text) {
+  const el = document.getElementById('aiText');
+  el.innerHTML = '';
+  let i = 0;
+  const iv = setInterval(() => {
+    if (i < text.length) { el.innerHTML += text[i]; i++; }
+    else clearInterval(iv);
+  }, 35);
+}
+setTimeout(() => { typeAI(aiMessages[aiIdx]); }, 800);
+setInterval(() => {
+  aiIdx = (aiIdx + 1) % aiMessages.length;
+  typeAI(aiMessages[aiIdx]);
+}, 5000);
+
+function showAI(msg) {
+  typeAI(msg);
+  document.getElementById('aiBubble').style.borderColor = '#f472b6';
+  setTimeout(() => document.getElementById('aiBubble').style.borderColor = 'rgba(167,139,250,0.4)', 2000);
+}
+
+function logout() {
+  localStorage.removeItem('currentUser');
+  location.href = 'index.html';
+}
+
+// MUSIK
+const songs = [
+  { title: 'Hati-Hati di Jalan', artist: 'Tulus' },
+  { title: 'Bulan', artist: 'Yura Yunita' },
+  { title: 'Tak Ingin Usai', artist: 'Mahalini' },
+  { title: 'Pupus', artist: 'Dewa 19' },
+  { title: 'Meraih Bintang', artist: 'Via Vallen' },
+  { title: 'Kangen', artist: 'Dewa 19' },
+  { title: 'Salah Apa Aku', artist: 'Judika' },
+  { title: 'Cinta Luar Biasa', artist: 'Andmesh Kamaleng' },
+  { title: 'Aku Milikmu', artist: 'D\'Masiv' },
+  { title: 'Tak Pernah Padam', artist: 'Ungu' },
+];
+
+let currentSong = -1;
+let playing = false;
+
+function renderSongs() {
+  const list = document.getElementById('songList');
+  list.innerHTML = songs.map((s, i) => `
+    <div class="song-item ${i===currentSong?'active':''}" onclick="playSong(${i})">
+      <span class="song-num">${i===currentSong&&playing?'▶':'${i+1}'}</span>
+      <div class="song-info">
+        <div class="title">${s.title}</div>
+        <div class="artist">${s.artist}</div>
+      </div>
+      <span class="song-play">${i===currentSong&&playing?'🔊':'▷'}</span>
+    </div>
+  `).join('');
+  // fix template literal issue
+  list.querySelectorAll('.song-num').forEach((el,i) => {
+    if(i !== currentSong || !playing) el.textContent = i+1;
+    else el.textContent = '▶';
+  });
+}
+
+function playSong(i) {
+  currentSong = i; playing = true;
+  document.getElementById('npTitle').textContent = songs[i].title;
+  document.getElementById('npArtist').textContent = songs[i].artist;
+  document.getElementById('nowPlayingBar').classList.add('show');
+  document.getElementById('musicFab').classList.add('playing');
+  document.getElementById('musicFab').textContent = '🎶';
+  showAI('Lagi dengerin "' + songs[i].title + '" - ' + songs[i].artist + ' 🎵 Enak banget kan!');
+  renderSongs();
+}
+
+function stopSong() {
+  playing = false; currentSong = -1;
+  document.getElementById('nowPlayingBar').classList.remove('show');
+  document.getElementById('musicFab').classList.remove('playing');
+  document.getElementById('musicFab').textContent = '🎵';
+  renderSongs();
+}
+
+function toggleMusic() {
+  document.getElementById('musicPanel').classList.toggle('show');
+  renderSongs();
+}
+
+renderSongs();
+</script>
+</body>
+  </html>
