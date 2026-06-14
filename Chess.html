@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catur - MyWorld</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { min-height:100vh; background:linear-gradient(135deg,#0f0c29,#302b63,#24243e); font-family:'Segoe UI',sans-serif; }
+.topbar { display:flex; align-items:center; gap:12px; padding:14px 20px; background:rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.1); }
+.topbar a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:18px; }
+.topbar h2 { color:#fff; font-size:18px; }
+
+/* Level Selector */
+#levelScreen {
+  display:flex; flex-direction:column; align-items:center;
+  padding:40px 20px;
+}
+#levelScreen h2 { color:#fff; font-size:22px; margin-bottom:8px; }
+#levelScreen p { color:rgba(255,255,255,0.5); font-size:13px; margin-bottom:30px; }
+.level-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; width:100%; max-width:340px; }
+.level-card {
+  background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.1);
+  border-radius:18px; padding:22px 16px; cursor:pointer; transition:0.3s; text-align:center;
+}
+.level-card:hover { transform:translateY(-4px); }
+.level-card.easy:hover { border-color:#34d399; background:rgba(52,211,153,0.1); }
+.level-card.normal:hover { border-color:#60a5fa; background:rgba(96,165,250,0.1); }
+.level-card.hard:hover { border-color:#f59e0b; background:rgba(245,158,11,0.1); }
+.level-card.expert:hover { border-color:#f87171; background:rgba(248,113,113,0.1); }
+.level-icon { font-size:30px; margin-bottom:8px; }
+.level-name { color:#fff; font-size:15px; font-weight:700; }
+.level-desc { color:rgba(255,255,255,0.4); font-size:11px; margin-top:4px; }
+.start-btn {
+  margin-top:24px; padding:13px 40px;
+  background:linear-gradient(135deg,#a78bfa,#7c3aed);
+  border:none; border-radius:14px; color:#fff; font-size:15px;
+  font-weight:700; cursor:pointer; transition:0.3s;
+  display:none;
+}
+.start-btn.show { display:block; }
+.start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(124,58,237,0.5); }
+
+/* Game Screen */
+#gameScreen { display:none; padding:16px; }
+.game-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.game-info span { color:rgba(255,255,255,0.7); font-size:13px; }
+.turn-badge {
+  background:rgba(167,139,250,0.2); border:1px solid rgba(167,139,250,0.4);
+  color:#a78bfa; padding:6px 14px; border-radius:10px; font-size:13px; font-weight:600;
+}
+.board-wrap { display:flex; justify-content:center; margin-bottom:16px; }
+#chessBoard {
+  display:grid; grid-template-columns:repeat(8,1fr);
+  width:min(90vw, 360px); height:min(90vw, 360px);
+  border:3px solid rgba(167,139,250,0.5);
+  border-radius:8px; overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.cell {
+  display:flex; align-items:center; justify-content:center;
+  font-size:clamp(20px, 5vw, 32px); cursor:pointer;
+  transition:0.15s; user-select:none;
+  position:relative;
+}
+.cell.light { background:#f0d9b5; }
+.cell.dark { background:#b58863; }
+.cell.selected { background:#7fc97f !important; }
+.cell.possible { background:#aad4a0 !important; }
+.cell.possible::after { content:''; position:absolute; width:30%; height:30%; background:rgba(0,0,0,0.2); border-radius:50%; }
+.cell.last-move { background:#cdd16f !important; }
+.cell.check { background:#ff6b6b !important; }
+
+.game-btns { display:flex; gap:10px; justify-content:center; }
+.gbtn {
+  padding:10px 20px; border-radius:10px; border:none; cursor:pointer;
+  font-size:13px; font-weight:600; transition:0.3s;
+}
+.gbtn.restart { background:rgba(167,139,250,0.2); color:#a78bfa; border:1px solid rgba(167,139,250,0.4); }
+.gbtn.menu { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.15); }
+.gbtn:hover { transform:translateY(-2px); }
+
+.status-msg {
+  text-align:center; color:#fff; font-size:14px; padding:10px;
+  background:rgba(255,255,255,0.07); border-radius:10px;
+  margin-bottom:12px; display:none;
+}
+.status-msg.show { display:block; }
+
+/* Modal */
+.modal-bg {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200;
+  display:none; align-items:center; justify-content:center;
+}
+.modal-bg.show { display:flex; }
+.modal {
+  background:linear-gradient(135deg,#1a1040,#2d1b69);
+  border:1px solid rgba(167,139,250,0.4);
+  border-radius:24px; padding:36px 30px; text-align:center; width:280px;
+}
+.modal h3 { color:#fff; font-size:20px; margin-bottom:8px; }
+.modal p { color:rgba(255,255,255,0.6); font-size:14px; margin-bottom:20px; }
+.modal-btn {
+  width:100%; padding:12px; margin-bottom:10px;
+  border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer;
+}
+.modal-btn.primary { background:linear-gradient(135deg,#a78bfa,#7c3aed); color:#fff; }
+.modal-btn.secondary { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="home.html">←</a>
+  <h2>♟️ Catur</h2>
+</div>
+
+<!-- Level Screen -->
+<div id="levelScreen">
+  <h2>Pilih Level</h2>
+  <p>Seberapa jago kamu main catur?</p>
+  <div class="level-grid">
+    <div class="level-card easy" onclick="selectLevel('easy',this)">
+      <div class="level-icon">🟢</div>
+      <div class="level-name">Easy</div>
+      <div class="level-desc">Untuk pemula</div>
+    </div>
+    <div class="level-card normal" onclick="selectLevel('normal',this)">
+      <div class="level-icon">🔵</div>
+      <div class="level-name">Normal</div>
+      <div class="level-desc">Agak menantang</div>
+    </div>
+    <div class="level-card hard" onclick="selectLevel('hard',this)">
+      <div class="level-icon">🟡</div>
+      <div class="level-name">Hard</div>
+      <div class="level-desc">Butuh strategi</div>
+    </div>
+    <div class="level-card expert" onclick="selectLevel('expert',this)">
+      <div class="level-icon">🔴</div>
+      <div class="level-name">Expert</div>
+      <div class="level-desc">Siap kalah?</div>
+    </div>
+  </div>
+  <button class="start-btn" id="startBtn" onclick="startGame()">▶ Mulai Main</button>
+</div>
+
+<!-- Game Screen -->
+<div id="gameScreen">
+  <div class="game-info">
+    <span id="levelBadge">Level: -</span>
+    <div class="turn-badge" id="turnBadge">Giliran: Putih ♙</div>
+  </div>
+  <div class="status-msg" id="statusMsg"></div>
+  <div class="board-wrap">
+    <div id="chessBoard"></div>
+  </div>
+  <div class="game-btns">
+    <button class="gbtn restart" onclick="restartGame()">🔄 Ulangi</button>
+    <button class="gbtn menu" onclick="goMenu()">🏠 Menu</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">🎉</h3>
+    <p id="modalMsg">Game over!</p>
+    <button class="modal-btn primary" onclick="restartGame()">Main Lagi</button>
+    <button class="modal-btn secondary" onclick="goMenu()">Pilih Level</button>
+  </div>
+</div>
+
+<script>
+// ===== CHESS ENGINE =====
+const PIECES = {
+  wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',
+  bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟'
+};
+
+let board, selected, turn, level, lastMove, gameOver;
+
+function initBoard() {
+  board = [
+    ['bR','bN','bB','bQ','bK','bB','bN','bR'],
+    ['bP','bP','bP','bP','bP','bP','bP','bP'],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    ['wP','wP','wP','wP','wP','wP','wP','wP'],
+    ['wR','wN','wB','wQ','wK','wB','wN','wR'],
+  ];
+  selected = null; turn = 'w'; gameOver = false; lastMove = null;
+}
+
+function getColor(p) { return p ? p[0] : null; }
+
+function isValid(r,c) { return r>=0&&r<8&&c>=0&&c<8; }
+
+function getMoves(r,c,brd) {
+  const p = brd[r][c]; if (!p) return [];
+  const col = p[0], type = p[1];
+  const moves = [];
+  const push = (nr,nc) => {
+    if (isValid(nr,nc) && getColor(brd[nr][nc]) !== col) moves.push([nr,nc]);
+  };
+  const slide = (dr,dc) => {
+    let nr=r+dr, nc=c+dc;
+    while(isValid(nr,nc)) {
+      if (!brd[nr][nc]) { moves.push([nr,nc]); nr+=dr; nc+=dc; }
+      else { if(getColor(brd[nr][nc])!==col) moves.push([nr,nc]); break; }
+    }
+  };
+  if (type==='P') {
+    const dir = col==='w'?-1:1;
+    if (isValid(r+dir,c) && !brd[r+dir][c]) {
+      moves.push([r+dir,c]);
+      const start = col==='w'?6:1;
+      if (r===start && !brd[r+2*dir][c]) moves.push([r+2*dir,c]);
+    }
+    [[dir,-1],[dir,1]].forEach(([dr,dc]) => {
+      if (isValid(r+dr,c+dc) && brd[r+dr][c+dc] && getColor(brd[r+dr][c+dc])!==col) moves.push([r+dr,c+dc]);
+    });
+  } else if (type==='R') { [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>slide(dr,dc)); }
+  else if (type==='B') { [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dr,dc])=>slide(dr,dc)); }
+  else if (type==='Q') { [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dr,dc])=>slide(dr,dc)); }
+  else if (type==='N') { [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>push(r+dr,c+dc)); }
+  else if (type==='K') { [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>push(r+dr,c+dc)); }
+  return moves;
+}
+
+function findKing(col, brd) {
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) if (brd[r][c]===col+'K') return [r,c];
+  return null;
+}
+
+function isInCheck(col, brd) {
+  const kpos = findKing(col, brd); if (!kpos) return false;
+  const opp = col==='w'?'b':'w';
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+    if (getColor(brd[r][c])===opp) {
+      if (getMoves(r,c,brd).some(([mr,mc])=>mr===kpos[0]&&mc===kpos[1])) return true;
+    }
+  }
+  return false;
+}
+
+function getLegalMoves(r,c,brd) {
+  return getMoves(r,c,brd).filter(([nr,nc]) => {
+    const nb = brd.map(row=>[...row]);
+    nb[nr][nc]=nb[r][c]; nb[r][c]=null;
+    return !isInCheck(getColor(brd[r][c]),nb);
+  });
+}
+
+function hasLegalMoves(col, brd) {
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++)
+    if (getColor(brd[r][c])===col && getLegalMoves(r,c,brd).length>0) return true;
+  return false;
+}
+
+function evalBoard(brd) {
+  const vals = {P:1,N:3,B:3,R:5,Q:9,K:100};
+  let score = 0;
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+    const p = brd[r][c]; if (!p) continue;
+    const v = vals[p[1]];
+    score += p[0]==='b' ? v : -v;
+  }
+  return score;
+}
+
+function getAllMoves(col, brd) {
+  const moves = [];
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++)
+    if (getColor(brd[r][c])===col)
+      getLegalMoves(r,c,brd).forEach(([nr,nc])=>moves.push([r,c,nr,nc]));
+  return moves;
+}
+
+function minimax(brd, depth, isMax, alpha, beta) {
+  const col = isMax?'b':'w';
+  if (!hasLegalMoves(col,brd)) return isInCheck(col,brd) ? (isMax?-1000:1000) : 0;
+  if (depth===0) return evalBoard(brd);
+  const moves = getAllMoves(col,brd);
+  let best = isMax ? -Infinity : Infinity;
+  for (const [r,c,nr,nc] of moves) {
+    const nb = brd.map(row=>[...row]);
+    nb[nr][nc]=nb[r][c]; nb[r][c]=null;
+    const v = minimax(nb,depth-1,!isMax,alpha,beta);
+    if (isMax) { best=Math.max(best,v); alpha=Math.max(alpha,v); }
+    else { best=Math.min(best,v); beta=Math.min(beta,v); }
+    if (beta<=alpha) break;
+  }
+  return best;
+}
+
+function aiMove() {
+  const depth = {easy:1,normal:2,hard:3,expert:4}[level];
+  const moves = getAllMoves('b',board);
+  if (!moves.length) return;
+  if (level==='easy') {
+    // Easy: random move sometimes blunders
+    const randMoves = moves.filter(()=>Math.random()>0.3);
+    const pick = (randMoves.length?randMoves:moves)[Math.floor(Math.random()*(randMoves.length||moves.length))];
+    const [r,c,nr,nc] = pick;
+    applyMove(r,c,nr,nc); return;
+  }
+  let best=-Infinity, bestMove=null;
+  for (const [r,c,nr,nc] of moves) {
+    const nb = board.map(row=>[...row]);
+    nb[nr][nc]=nb[r][c]; nb[r][c]=null;
+    const v = minimax(nb,depth-1,false,-Infinity,Infinity);
+    if (v>best) { best=v; bestMove=[r,c,nr,nc]; }
+  }
+  if (bestMove) { const [r,c,nr,nc]=bestMove; applyMove(r,c,nr,nc); }
+}
+
+function applyMove(r,c,nr,nc) {
+  // Pawn promotion
+  let piece = board[r][c];
+  board[nr][nc] = piece; board[r][c] = null;
+  if (piece==='wP' && nr===0) board[nr][nc]='wQ';
+  if (piece==='bP' && nr===7) board[nr][nc]='bQ';
+  lastMove = [r,c,nr,nc];
+  turn = turn==='w'?'b':'w';
+  renderBoard();
+  checkGameState();
+}
+
+function checkGameState() {
+  const col = turn;
+  if (!hasLegalMoves(col,board)) {
+    gameOver = true;
+    if (isInCheck(col,board)) {
+      const winner = col==='w'?'Hitam (AI)':'Putih (Kamu)';
+      showModal(col==='w'?'😢 Kamu Kalah!':'🎉 Kamu Menang!',
+        winner + ' menang! Skakmat!');
+    } else {
+      showModal('🤝 Seri!','Tidak ada langkah yang tersisa. Draw!');
+    }
+    return;
+  }
+  const msg = document.getElementById('statusMsg');
+  if (isInCheck(col,board)) {
+    msg.textContent = (col==='w'?'⚠️ Raja Putihmu':'⚠️ Raja Hitam') + ' dalam skak!';
+    msg.classList.add('show');
+  } else {
+    msg.classList.remove('show');
+  }
+  document.getElementById('turnBadge').textContent = turn==='w'?'Giliran: Putih ♙':'Giliran: Hitam (AI) ♟';
+  if (turn==='b' && !gameOver) setTimeout(()=>{ aiMove(); }, 400);
+}
+
+function renderBoard() {
+  const bd = document.getElementById('chessBoard');
+  bd.innerHTML='';
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+    const cell = document.createElement('div');
+    cell.className='cell '+((r+c)%2===0?'light':'dark');
+    cell.dataset.r=r; cell.dataset.c=c;
+    const p = board[r][c];
+    if (p) cell.textContent = PIECES[p];
+    if (selected && selected[0]===r && selected[1]===c) cell.classList.add('selected');
+    if (lastMove && lastMove.some((_,i)=>i<2?lastMove[0]===r&&lastMove[1]===c:lastMove[2]===r&&lastMove[3]===c)) {
+      if ((lastMove[0]===r&&lastMove[1]===c)||(lastMove[2]===r&&lastMove[3]===c)) cell.classList.add('last-move');
+    }
+    const kpos = findKing('w',board);
+    if (isInCheck('w',board) && kpos && kpos[0]===r && kpos[1]===c) cell.classList.add('check');
+    if (selected) {
+      const moves = getLegalMoves(selected[0],selected[1],board);
+      if (moves.some(([mr,mc])=>mr===r&&mc===c)) cell.classList.add('possible');
+    }
+    cell.onclick = () => handleClick(r,c);
+    bd.appendChild(cell);
+  }
+}
+
+function handleClick(r,c) {
+  if (gameOver || turn==='b') return;
+  const p = board[r][c];
+  if (selected) {
+    const moves = getLegalMoves(selected[0],selected[1],board);
+    if (moves.some(([mr,mc])=>mr===r&&mc===c)) {
+      applyMove(selected[0],selected[1],r,c);
+      selected=null; return;
+    }
+  }
+  if (p && getColor(p)==='w') { selected=[r,c]; renderBoard(); }
+  else { selected=null; renderBoard(); }
+}
+
+function showModal(title,msg) {
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalMsg').textContent=msg;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+let selectedLevel = null;
+function selectLevel(lv, el) {
+  selectedLevel=lv;
+  document.querySelectorAll('.level-card').forEach(c=>c.style.opacity='0.5');
+  el.style.opacity='1';
+  document.getElementById('startBtn').classList.add('show');
+}
+
+function startGame() {
+  level=selectedLevel;
+  document.getElementById('levelScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  document.getElementById('levelBadge').textContent='Level: '+level.charAt(0).toUpperCase()+level.slice(1);
+  initBoard(); renderBoard();
+}
+
+function restartGame() {
+  document.getElementById('modalBg').classList.remove('show');
+  initBoard(); renderBoard();
+  document.getElementById('statusMsg').classList.remove('show');
+  document.getElementById('turnBadge').textContent='Giliran: Putih ♙';
+  gameOver=false;
+}
+
+function goMenu() {
+  document.getElementById('modalBg').classList.remove('show');
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('levelScreen').style.display='flex';
+  document.querySelectorAll('.level-card').forEach(c=>c.style.opacity='1');
+  document.getElementById('startBtn').classList.remove('show');
+  selectedLevel=null;
+}
+
+if (!localStorage.getItem('currentUser')) location.href='index.html';
+</script>
+</body>
+  </html>
